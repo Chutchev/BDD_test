@@ -11,4 +11,4 @@ def before_all(context):
             create == False
             return
     if create == True:
-        os.makedirs("\\Screenshots\\")
+        os.makedirs(".\\Screenshots\\")
