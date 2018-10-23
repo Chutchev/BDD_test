@@ -86,7 +86,7 @@ def send_email(path):
     msg = MIMEMultipart()
     msg['Subject'] = 'Отчет по тесту'
     msg['From'] = 'testPythonIVT@gmail.com'
-    msg['To'] = 'kolovorot2233@gmail.com'
+    msg['To'] = 'ichutchev98@gmail.com'
     text = MIMEText("Отчет по тесту от {}".format(datetime.now()))
     msg.attach(text)
     part = MIMEApplication(open(path, 'rb').read())
@@ -97,5 +97,5 @@ def send_email(path):
     s.starttls()
     s.ehlo()
     s.login('testPythonIVT@gmail.com', 'testtset12')
-    s.sendmail('testPythonIVT@gmail.com', 'kolovorot2233@gmail.com', msg.as_string())
+    s.sendmail('testPythonIVT@gmail.com', 'ichutchev@gmail.com', msg.as_string())
     s.quit()
