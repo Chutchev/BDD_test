@@ -1,3 +1,5 @@
+import shutil
+
 from behave import *
 import time
 from datetime import datetime
@@ -97,5 +99,11 @@ def send_email(path):
     s.starttls()
     s.ehlo()
     s.login('testPythonIVT@gmail.com', 'testtset12')
-    s.sendmail('testPythonIVT@gmail.com', 'ichutchev@gmail.com', msg.as_string())
+    s.sendmail('testPythonIVT@gmail.com', 'ichutchev98@gmail.com', msg.as_string())
     s.quit()
+
+
+@then("Удалить скриншоты после отправки")
+def step_impl(context):
+    shutil.rmtree(".\\Screenshots\\")
+    os.remove(".\\Screenshots.zip")
