@@ -86,10 +86,10 @@ def zip(path, name):
 
 def send_email(path):
     msg = MIMEMultipart()
-    msg['Subject'] = 'Отчет по тесту'
-    msg['From'] = 'testPythonIVT@gmail.com'
-    msg['To'] = 'ichutchev98@gmail.com'
-    text = MIMEText("Отчет по тесту от {}".format(datetime.now()))
+    msg['Subject'] = 'subject'
+    msg['From'] = 'youremail'
+    msg['To'] = 'toemail'
+    text = MIMEText("text{}".format(datetime.now()))
     msg.attach(text)
     part = MIMEApplication(open(path, 'rb').read())
     part.add_header('Content-Disposition', 'attachment', filename=path)
@@ -98,8 +98,8 @@ def send_email(path):
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login('testPythonIVT@gmail.com', 'testtset12')
-    s.sendmail('testPythonIVT@gmail.com', 'ichutchev98@gmail.com', msg.as_string())
+    s.login(youremail, yourpassword)
+    s.sendmail('youremail', 'toemail', msg.as_string())
     s.quit()
 
 
