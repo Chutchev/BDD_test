@@ -1,5 +1,4 @@
 import shutil
-
 from behave import *
 import time
 from datetime import datetime
@@ -13,66 +12,21 @@ from email.mime.multipart import MIMEMultipart
 import zipfile
 
 
-@when("Считать имя канала из текстового файла channel_name.txt")
-def step_impl(context):
-    with open(os.path.abspath("channel_name.txt"), "r") as channel_name_file:
-        context.channel_name = channel_name_file.readline()
-
-
-@step("Зайти на этот канал на твиче")
-def step_impl(context):
-    context.driver.get("http:\\twitch.tv\\" + context.channel_name)
-
-
-@step("Сделать полноэкранный режим")
-def step_impl(context):
-    context.driver.maximize_window()
-
-
-@then('Просмотреть стрим "{second}" секунд, в случае ошибки, сделать скриншот браузера')
-def step_impl(context, second):
-    try:
-        try:
-            but_play = context.driver.find_element_by_xpath('//*[@class="player-button qa-pause-play-button"]').click()
-        except WebDriverException:
-            but_play = context.driver.find_element_by_xpath('//*[@class="player-content-button js-player-matur'
-                                                            'e-accept js-mature-accept-label"]').click()
-    except NoSuchElementException:
-        screen = ImageGrab.grab()
-        screen.save("Screenshots\\not_find_a_channel.jpg")
-        skip_scenario(context)
-    time.sleep(int(second))
-
-
 @then('Перейти на вкладку "{tab_name}"')
 def step_impl(context, tab_name):
     need_tab = context.driver.find_element_by_xpath((('//*[@class="tw-font-size-5" and contains(text(), '
                                                       '"{}")]').format(tab_name))).click()
 
-
-@then('Просмотреть содержимое вкладки "{tab_name}" в течении "{second}" секунд и сделать скриншот')
-def step_impl(context, second, tab_name):
-    time.sleep(int(second))
-    screen = ImageGrab.grab()
-    screen.save("Screenshots\\Вкладка {}.jpg".format(tab_name))
-
-
 @step('Записать в логи результат')
 def step_impl(context):
     with open(os.path.abspath("log.txt"), "a") as log:
-        log.write("{0} Сценарий выполнен.\n".format(datetime.now()))
+        log.write("{0} Канал существует.\n".format(datetime.now()))
 
 
 def skip_scenario(context):
     with open(os.path.abspath("log.txt"), "a") as log:
-        log.write("{0} Сценарий не выполнен.\n".format(datetime.now()))
+        log.write("{0} Канал не существует. Пропуск сценария.\n".format(datetime.now()))
         context.scenario.skip(require_not_executed=True)
-
-
-@then("Отправить скриншоты по почте")
-def step_impl(context):
-    zip(".\\Screenshots", "Screenshots.zip")
-    send_email(".\\Screenshots.zip")
 
 def zip(path, name):
     screenshots_zip = zipfile.ZipFile(name, "w")
@@ -84,11 +38,11 @@ def zip(path, name):
                                   compress_type=zipfile.ZIP_DEFLATED)
     screenshots_zip.close()
 
-def send_email(path):
+def send_email(path, mailto):
     msg = MIMEMultipart()
     msg['Subject'] = 'Отчет по тесту'
     msg['From'] = 'testPythonIVT@gmail.com'
-    msg['To'] = 'ichutchev98@gmail.com'
+    msg['To'] = mailto
     text = MIMEText("Отчет по тесту от {}".format(datetime.now()))
     msg.attach(text)
     part = MIMEApplication(open(path, 'rb').read())
@@ -99,11 +53,43 @@ def send_email(path):
     s.starttls()
     s.ehlo()
     s.login('testPythonIVT@gmail.com', 'testtset12')
-    s.sendmail('testPythonIVT@gmail.com', 'ichutchev98@gmail.com', msg.as_string())
+    s.sendmail('testPythonIVT@gmail.com', mailto, msg.as_string())
     s.quit()
 
+@when('Зашли на канал твича считанный с  файла "{filename}"')
+def step_impl(context, filename):
+    with open(os.path.abspath(f"{filename}"), "r") as channel_name_file:
+        context.channel_name = channel_name_file.readline()
+    context.driver.get("http:\\twitch.tv\\" + context.channel_name)
 
-@then("Удалить скриншоты после отправки")
+
+@step('Подождать "{second}" секунды  и сделать скриншот')
+def step_impl(context, second):
+    screen = ImageGrab.grab()
+    time_now = str(datetime.now()).replace(" ", ' время').replace(":",  " ")
+    time_now = time_now[:len(time_now)-7]
+    screen.save(os.path.realpath(".\\Screenshots\\"+time_now+".jpg"))
+    time.sleep(int(second))
+
+
+@then('Отправить файлы на почту "{mailto}"')
+def step_impl(context, mailto):
+    zip(".\\Screenshots", "Screenshots.zip")
+    send_email(os.path.realpath(".\\Screenshots.zip"), mailto)
+
+def click_button_play(context):
+    try:
+        but_play = context.driver.find_element_by_xpath('//*[@class="player-button qa-pause-play-button"]').click()
+    except WebDriverException:
+        but_play = context.driver.find_element_by_xpath('//*[@class="player-content-button js-player-matur'
+                                                        'e-accept js-mature-accept-label"]').click()
+
+
+@then("Нажать на кнопку Play")
 def step_impl(context):
-    shutil.rmtree(".\\Screenshots\\")
-    os.remove(".\\Screenshots.zip")
+    try:
+        click_button_play(context)
+    except NoSuchElementException:
+        screen = ImageGrab.grab()
+        screen.save("Screenshots\\not_find_a_channel.jpg")
+        skip_scenario(context)
