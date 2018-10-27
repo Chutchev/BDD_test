@@ -98,7 +98,7 @@ def send_email(path):
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login(youremail, yourpassword)
+    s.login("youremail", "yourpassword")
     s.sendmail('youremail', 'toemail', msg.as_string())
     s.quit()
 
